@@ -1,0 +1,45 @@
+name: Flutter Build APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          cd form_app
+          flutter pub get
+
+      - name: Fix Gradle Permission
+        run: chmod +x form_app/android/gradlew
+
+      - name: Build APK
+        run: |
+          cd form_app
+          flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MEnergy-Admin-APK
+          path: form_app/build/app/outputs/flutter-apk/app-release.apk
